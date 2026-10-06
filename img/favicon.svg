@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Dynamite">
+<rect width="200" height="200" rx="44" fill="#111214"/>
+<g transform="translate(20 19) scale(.8)">
+<defs><mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><path d="M67 106 L91 111 L87 118 Z M133 106 L109 111 L113 118 Z M92 150 H108 L100 163 Z" fill="#000"/></mask></defs>
+<g fill="#ffffff" mask="url(#cut)"><path d="M49 96 L38 26 Q40 16 50 22 L96 66 Z" fill-rule="evenodd"/><path d="M151 96 L162 26 Q160 16 150 22 L104 66 Z" fill-rule="evenodd"/><path d="M100 60 C70 60 46 72 45 102 C44 128 60 150 76 168 C84 178 92 185 100 185 Z" fill-rule="evenodd"/><path d="M100 60 C130 60 154 72 155 102 C156 128 140 150 124 168 C116 178 108 185 100 185 Z" fill-rule="evenodd"/><path d="M99.4 60H100.6V184H99.4Z"/></g>
+</g>
+</svg>

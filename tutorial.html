@@ -1,272 +1,547 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DYNAMITE/tutorial</title>
-<meta name="description" content="Dynamite-webpage/tutorial">
-<meta name="author" content="Azul Lopez">
+<title>Tutorial – Dynamite Proving System</title>
+<meta name="description" content="First steps in Dynamite: open the system for the first time and close your first proof.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tutorial – Dynamite Proving System">
+<meta property="og:description" content="First steps in Dynamite: open the system for the first time and close your first proof.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<script>document.documentElement.className += ' js';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#1f1f1f;
+    --text:#ffffff;
+    --muted:#8f8f8f;
+    --gap:16px;
+    --radius:8px;
+    --ease:cubic-bezier(.7,0,.2,1);
+    --app-height:100svh;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  ::selection{background:rgba(255,255,255,.1);color:#fff}
+  ::-webkit-scrollbar{width:0;display:none !important}
+  html,body{width:100%;height:auto;min-height:100%;-ms-overflow-style:none;scrollbar-width:none}
 
-<!-- Favicons
-    ================================================== -->
-<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="72x72" href="img/apple-touch-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png">
+  /* Lenis smooth scroll */
+  html.lenis{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto}
+  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+  .lenis.lenis-stopped{overflow:hidden}
+  .lenis.lenis-scrolling iframe{pointer-events:none}
 
-<!-- Bootstrap -->
-<link rel="stylesheet" type="text/css"  href="css/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="fonts/font-awesome/css/font-awesome.css">
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:clamp(16px,1.2vw,19px);line-height:1.6;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  a{color:inherit;text-decoration:none}
+  .word,.char{display:inline-block}
 
-<!-- Stylesheet
-    ================================================== -->
-<link rel="stylesheet" type="text/css"  href="css/style.css">
-<link rel="stylesheet" type="text/css" href="css/nivo-lightbox/nivo-lightbox.css">
-<link rel="stylesheet" type="text/css" href="css/nivo-lightbox/default.css">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,600,300' rel='stylesheet' type='text/css'>
-<script type="text/javascript" src="js/modernizr.custom.js"></script>
+  main{padding:var(--gap) var(--gap) 96px;display:flex;flex-direction:column;gap:var(--gap)}
 
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+  /* ---------- LOGO ---------- */
+  .logo-slot{
+    flex:none;display:flex;align-items:center;justify-content:center;
+    border:1px dashed #3a3a3a;border-radius:var(--radius);
+    color:var(--muted);font-size:10px;text-align:center;overflow:hidden;
+    width:56px;height:56px;
+  }
+  .logo-slot:has(img){border:none}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;display:block}
+  .logo-slot img + span{display:none}
+
+  /* ---------- HERO ---------- */
+  .t-hero{
+    position:relative;overflow:hidden;
+    min-height:min(72svh,760px);
+    display:flex;flex-direction:column;justify-content:space-between;gap:40px;
+    padding:24px;
+    background:var(--card);border-radius:var(--radius);
+  }
+  .t-top{display:flex;align-items:center;gap:14px}
+  .t-top .name{font-weight:500;letter-spacing:-.02em;font-size:20px}
+  .t-top .name span{color:var(--muted);font-weight:400}
+  .t-top a{display:flex;align-items:center;gap:14px;transition:opacity .3s ease}
+  .t-top a:hover{opacity:.75}
+  .t-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap}
+  .line-clip{overflow:hidden;padding:.02em 0 .1em;margin-bottom:-.1em}
+  .display-text{
+    display:block;font-weight:500;white-space:nowrap;
+    font-size:clamp(4.5rem,19vw,17rem);
+    line-height:.88;letter-spacing:-.05em;margin-left:-.04em;
+  }
+  .js .t-title{visibility:hidden}
+  .t-lead{max-width:520px;color:#cfcfcf}
+  .t-lead a{color:var(--text);border-bottom:1px solid #555;transition:border-color .3s ease}
+  .t-lead a:hover{border-color:#fff}
+  .js .t-fade{opacity:0}
+  .js.no-anim .t-title{visibility:visible}
+  .js.no-anim .t-fade{opacity:1}
+
+  /* ---------- SECTIONS ---------- */
+  .section{
+    background:var(--card);border-radius:var(--radius);
+    padding:clamp(24px,5vw,64px);
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:32px 64px;
+    scroll-margin-top:var(--gap);
+  }
+  .section h2{
+    font-weight:500;font-size:clamp(30px,3.6vw,60px);line-height:1;letter-spacing:-.04em;
+    align-self:start;position:sticky;top:calc(var(--gap) + 8px);
+  }
+  .section .body{display:flex;flex-direction:column;gap:20px;min-width:0;max-width:820px}
+  .section p{color:#cfcfcf}
+  .section p strong{color:var(--text);font-weight:500}
+  @media (max-width:860px){.section{grid-template-columns:1fr}.section h2{position:static}}
+
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:#2b2b2b;padding:2px 6px;border-radius:4px;color:#fff;white-space:nowrap}
+
+  /* code blocks */
+  .codeblock{position:relative}
+  pre.code{
+    background:#101010;border:1px solid #2a2a2a;border-radius:var(--radius);
+    padding:18px 20px;overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.84em;line-height:1.65;color:#e9e9e9;white-space:pre;tab-size:2;
+  }
+  pre.code::-webkit-scrollbar{height:0}
+  .copy{
+    position:absolute;top:10px;right:10px;
+    background:#2b2b2b;color:#fff;border:0;border-radius:6px;
+    padding:4px 10px;font:500 12px/1.6 "Inter",system-ui,sans-serif;cursor:pointer;
+    opacity:0;transition:opacity .25s ease,background .25s ease;
+  }
+  .codeblock:hover .copy,.copy:focus-visible{opacity:1}
+  .copy:hover{background:#3a3a3a}
+  @media (hover:none){.copy{opacity:1}}
+
+  .btn{
+    align-self:flex-start;background:var(--text);color:#000;border-radius:999px;
+    padding:12px 22px;font-weight:500;transition:transform .2s ease,background .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px);background:#e8e8e8}
+
+  .qed{display:inline-block;align-self:flex-start;background:#2b2b2b;border-radius:999px;padding:6px 14px;font-size:14px}
+
+  footer .fcur{color:#fff;margin-left:1px;animation:fcur-blink 1s steps(2,start) infinite}
+  @keyframes fcur-blink{to{visibility:hidden}}
+  @media (prefers-reduced-motion:reduce){footer .fcur{animation:none}}
+  footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:8px 24px 24px;color:var(--muted);font-size:14px}
+
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- NAV BAR (floating dock) ---------- */
+  .dock{
+    position:fixed;left:50%;bottom:var(--gap);z-index:80;
+    transform:translateX(-50%);
+    display:flex;align-items:center;gap:4px;padding:6px;
+    background:rgba(31,31,31,.82);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.06);border-radius:12px;
+    transition:transform .9s var(--ease);
+  }
+  .js:not(.ready) .dock{transform:translateX(-50%) translateY(calc(100% + 32px))}
+  .dock-item{
+    position:relative;display:flex;align-items:center;
+    height:44px;padding:0 12px;border-radius:8px;color:var(--text);
+  }
+  .dock-item:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .dock-item__bg{position:absolute;inset:0;border-radius:8px;background:#fff;opacity:0;transition:opacity .3s ease}
+  .dock-item:hover .dock-item__bg{opacity:.08}
+  .dock-item.is-current .dock-item__bg{opacity:.14}
+  .dock-icon{position:relative;width:20px;height:20px;flex:none;opacity:.7;transition:opacity .3s ease,transform .5s var(--ease)}
+  .dock-item:hover .dock-icon,.dock-item.is-current .dock-icon{opacity:1}
+  .dock-item:hover .dock-icon{transform:translateY(-2px) scale(1.3)}
+  .dock-item:hover + .dock-item .dock-icon,
+  .dock-item:has(+ .dock-item:hover) .dock-icon{transform:translateY(-1px) scale(1.1);opacity:.9}
+  .dock-icon svg{display:block;width:100%;height:100%}
+
+  .dock-label{
+    position:relative;overflow:hidden;white-space:nowrap;
+    max-width:0;margin-left:0;
+    transition:max-width .6s var(--ease),margin-left .6s var(--ease);
+  }
+  .dock-item.is-current .dock-label{max-width:140px;margin-left:10px}
+  .dock-label .dock-text{font-size:15px;font-weight:500;line-height:1.3}
+  .dock-label .char{display:inline-block;transform:translateY(110%);transition:transform .55s var(--ease);transition-delay:calc(var(--c,0)*28ms)}
+  .dock-item.is-current .dock-label .char{transform:none}
+  @media (min-width:992px){.dock-item .dock-label{display:none}}
+
+  .dock-tip{
+    position:absolute;left:50%;bottom:calc(100% + 18px);
+    transform:translate(-50%,6px);opacity:0;pointer-events:none;
+    background:#fff;color:#000;border-radius:6px;padding:4px 10px;
+    white-space:nowrap;font-size:13px;font-weight:500;
+    transition:opacity .25s ease,transform .35s var(--ease);
+  }
+  .dock-item:hover .dock-tip{opacity:1;transform:translate(-50%,0)}
+  @media (max-width:991px){.dock-item.hide-tablet{display:none}.dock-tip{display:none}}
+  @media (max-width:420px){.dock-item{padding:0 10px}.dock-item.is-current .dock-label{max-width:110px}}
+  @media (hover:none){.dock-tip{display:none}}
+
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .js .t-fade{opacity:1}
+  }
+</style>
 </head>
-<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
-<!-- Navigation
-    ==========================================-->
-<nav id="menu" class="navbar navbar-default navbar-fixed-top">
-  <div class="container"> 
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-		<a class="navbar-brand page-scroll" href="index.html">
-			<img src="./img/LogoDyn-small-white.png" alt="logo" class="logo">Dynamite
-		</a>
-	  </div>
-    
-	  <!-- "<i class="fa fa-play fa-rotate-270"></i>  -->
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="index.html" class="page-scroll">Home</a></li>
-        <li><a href="index.html#about" class="page-scroll">About</a></li>
-        <li><a href="index.html#portfolio" class="page-scroll">Publications</a></li>
-        <li><a href="index.html#req" class="page-scroll">Download</a></li>
-<!--        <li><a href="index.html#contact" class="page-scroll">Contact</a></li>-->
-      </ul>
-    </div>
-    <!-- /.navbar-collapse --> 
-  </div>
-  <!-- /.container-fluid --> 
-</nav>
-<!-- Header -->
-<header class="header">
-  <div class="intro-tuto">
-    <div class="container">
-      <div class="row">
-        <div class="intro-text">
-          <h1>Tutorial</h1>
-			<hr class="hr-tuto">
-      </div>
-	  <div class="about-text">
-		<p>This simple tutorial will help you with the first steps in Dynamite. It will guide you in opening the system for first time and closing your first proof. Please send any comments and/or problems to <code>mmoscato@dc.uba.ar</code>.</p>
-	</div>
-					
-    </div>
-  </div>
-</header>
-<!-- About Section -->
-<div id="about-tuto">
-  <div class="container">
-<!--
-    <div class="section-title text-center center">
-      <h2>Starting the tutorial</h2>
-      <hr>
-    </div>
--->
-    <div class="row">
-      <div class="col-xs-12 col-md-12">
-        <div class="about-text">
-          	<p>First download the Alloy specification we will use in order to explain the basic DPS commands. (This Alloy specification is based on the model example "file_system.als" that can be found in the Alloy Analyzer distribution.)</p>
-				<p class="btn-centered"><a href="download/file_system.als" class="btn btn-default btn-lg page-scroll ">Download Alloy Model</a></p>
-			<p>Then you may want to create a working directory, in which the Alloy specification must be placed. Once in that directory, to run the tool you only have to execute the shell script dps, that can be found in the root of the instalation. For example, if the Dynamite Proving System was installed in the directory /opt/dps you may run the script by typing</p>
-     		<div class="panel-tutorial"><div class="panel-body-tutorial">~tutorial$ /opt/dps/dps</div></div>
-     	<h2>Loading the specification</h2>
-			<p>To load the Alloy specification, it is necessary to invoke the DPS command open-alloy-file. To do this, as usual in Emacs systems, you must hold the meta key (generally mapped to the Alt key) and press the x key, then you must type the name of the command: open-alloy-file. This kind of invocations will be abbreviated as</p>
-    		<div class="panel-tutorial"><div class="panel-body-tutorial">M-x open-alloy-file</div></div>
-			<p>Then, the system will ask for the name of the Alloy file to be loaded. The specification will be shown in the current Emacs buffer.</p>
-			<h2>Proving the assertion NoDirAliases</h2>
-			<p>To initiate the proof of an assertion, you must invoke the command</p>
-    		<div class="panel-tutorial"><div class="panel-body-tutorial">M-x prove-alloy-assert</div></div>
-			<p>because this is the name of the assertion we will prove.</p>
-			<p>A message will appear indicating whether the underlying theories needed to prove the assertion  could be correctly generated. If an error occurs during that process, it will be reported in the Emacs buffer called DynamiteTranslator output. To switch to this buffer, you may press the x key while holding the Ctrl key, then press the b key and after that enter the name of the buffer</p>
-			<div class="panel-tutorial"><div class="panel-body-tutorial">C-x b DynamiteTranslator output</div></div>
-			<p>After this, the main goal will be displayed in the *pvs* buffer. In this case, you will see the following</p>
-			<div class="panel-tutorial"><div class="panel-body-tutorial">NoDirAliases :<br/><br/>|-------<br/>{1}   (all O : Dir| (lone (contents . O) ) )<br/>Rule?</div></div>
-			<p>As in PVS, the user commands are typed in the Rule? prompt. The first command we will introduce, will be (skosimp*) to skolemize the quantified variables.</p>
-			<div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (skosimp*)</br>Repeatedly Skolemizing and flattening,</br>this simplifies to:</br>NoDirAliases :</br></br>|------- </br>{1}   (lone (contents . oh_1)</br>Rule?</div></div>
-			<p>The quantified variables have been replaced by fresh new constants. Now, we want to introduce the case in which oh_1 is the root directory. To do that, we will use the command dps-case. This command application yields two subgoals: NoDirAliases.1 and NoDirAliases.2. The former has the Alloy formula oh_1 in Root as a new hypothesis.</p>
-     		<div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (dps-case "oh_1 in Root")</br>
-  Translating the formula.</br>
-</br>
-  ...</br>
-</br>
-  Formula translated.</br>
-  Introducing case...,</br>
-  this yields  2 subgoals:</br>
-  NoDirAliases.1 :  </br>
-  </br>
-  {-1}  (oh_1 in Root)</br>
-      |-------</br>
-  [1]   (lone (contents . oh_1) )</br>
-  </br>
-  Rule?</div></div>
-			<p>At this point, we want to use the Alloy fact RootHasNoParent as another hypothesis in the proof. This fact is part of the same specification we loaded earlier, and states that the root directory has no parent.</p>
-    		<div class="panel-tutorial"><div class="panel-body-tutorial">fact RootHasNoParent { all r: Root | no r.parent  }</div></div>
-			<p>To do this, we type (use "RootHasNoParent") at the Rule? prompt.</p>
-			<div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (use "RootHasNoParent")</br>
-  ...</br>
-  Using lemma RootHasNoParent, </br>
-  this yields  2 subgoals:</br>
-  NoDirAliases.1.1 :  </br>
-  </br>
-  {-1}  (no (oh_1 . parent) )</br>
-  [-2]  (oh_1 in Root)</br>
-      |-------</br>
-  [1]   (lone (contents . oh_1) )</br>
-  </br>
-  Rule?</div></div>
-	<p>This command application opens a new branch in which we will have to be prove that oh_1 is the root directory. On the other hand, to close the current branch we need to use the following fact, that establish the relation between tha parent and the contents of a directory.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">fact ParentDefinition { all d: Dir | d.parent = (contents.d) . Name }</div></div>
-	<p>As before, this fact is introduced as a new hypothesis by applying the use command.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (use "ParentDefinition")</br>
-  Using lemma ParentDefinition,</br>
-  this simplifies to: </br>
-  NoDirAliases.1.1 :  </br>
-  </br>
-  {-1}  ( (oh_1 . parent) = ( (contents . oh_1) . Name) )</br>
-  [-2]  (no (oh_1 . parent) )</br>
-  [-3]  (oh_1 in Root)</br>
-    |-------</br>
-  [1]   (lone (contents . oh_1) )</br>
-  </br>
-  Rule?</div></div>
-	<p>Now, the hypotheses we have in the current goal can be used to prove that the set denoted by ( (contents . oh_1) . Name) is empty. Would it be the case that this assertion is sufficient to prove that contents . oh_1 is also empty?</p>
-	<p>We can use the Alloy Analyzer to search for counter examples of that implication. To do this, the command dps-hyp must be used.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (dps-hyp "no ( (contents.oh_1) . Name) => no contents.oh_1")</br>
-  Trying to validate the formula with models of size 3.</br>
-  No counter-example found in that scope. Formula translated.</br>
-  Introducing case...,</br>
-  this yields  2 subgoals:</br>
-  NoDirAliases.1.1.1 : </br>
-  </br>
-  {-1}  ( (no ( (contents . oh_1) . Name) ) => (no (contents . oh_1) ) )</br>
-  [-2]  ( (oh_1 . parent) = ( (contents . oh_1) . Name) )</br>
-  [-3]  (no (oh_1 . parent) )</br>
-  [-4]  (oh_1 in Root)</br>
-  |-------</br>
-  [1]   (lone (contents . oh_1) )</br>
-  </br>
-  Rule?</div></div>
-	<p>Since no counterexample were found, the formula is introduced as a hypothesis in this branch, and a new branch is opened, where this formula is stated as an obligation to be proved.</p>
-	<p>The current branch can be closed by applying the command (reduce), since no P => lone P is an known property (loaded when the proof begins).</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (reduce)</br>
-  ParentDefinition rewrites (oh_1 . parent)</br>
-    to ( (contents . oh_1) . Name)</br>
-  NoneImpliesLone rewrites (lone (contents . oh_1) )</br>
-    to TRUE</br>
-  Repeatedly simplifying with decision procedures, rewriting,</br>
-    propositional reasoning, quantifier instantiation, skolemization,</br>
-  if-lifting and equality replacement,</br>
-  </br>
-	   This completes the proof of NoDirAliases.1.1.1.</div></div>
-	<p>Then, the system automatically shows us the next open branch. In this case, the branch opened when the  dps-case was applied.</p>
-	<p>Now we can use the Alloy assertion Lemma1, present in the specification, as a lemma to close this branch.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (use "Lemma1")</br>
-  Using lemma Lemma1,</br>
-  </br>
-  This completes the proof of NoDirAliases.1.1.2.</br>
-  </br>
-	   This completes the proof of NoDirAliases.1.1.</div></div>
-	<p>To close the next open branch we need to prove that oh_1 is the root directory.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">NoDirAliases.1.2 (TCC):   </br>
-  </br>
-  [-1]  (oh_1 in Root)</br>
-    |-------</br>
-  {1}   ( (one oh_1) && (oh_1 in Root) )</br>
-  [2]   (lone (contents . oh_1) )</br>
-  </br>
-	   Rule?</div></div>
-	<p>As the sequent formula -1 is part of the conjunction in 1, we only have to focus our effort in prove that the other part of 1 also holds. To do that, we only need to use the predicates that characterize the constant oh_1.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (typepred "oh_1")</br>
-  ...</br>
-  Adding type constraints for oh_1,</br>
-  this simplifies to: </br>
-  NoDirAliases.1.2 :  </br>
-  </br>
-  {-1}  ( (one oh_1) && (oh_1 in Dir) )</br>
-  [-2]  (oh_1 in Root)</br>
-    |-------</br>
-  {1}   (one oh_1)</br>
-  [2]   (lone (contents . oh_1) )</br>
-  </br>
-	   Rule?</div></div>
-	<p>Just by applying the command (prop) this branch can be closed.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (prop)</br>
-  ...</br>
-  This completes the proof of file_system?NoDirAliases.1.2.</br>
-  </br>
-	   This completes the proof of file_system?NoDirAliases.1.</div></div>
-	<p>Now we have to prove the branch opened when we introduced the case in which oh_1 is the root directory. The following goal can be interpreted as the case in which oh_1 is a directory but it is not the root.</p>
-  <div class="panel-tutorial"><div class="panel-body-tutorial">file_system?NoDirAliases.2 :  </br>
-  </br>
-    |-------</br>
-  {1}   (oh_1 in Root)</br>
-  [2]   (lone (oh_1 . parent!1) )</br>
-  </br>
-	  Rule?</div></div>
-	<p>To close this branch, we would like to use the Alloy fact OneParent as a lemma. This fact establish that every directory that is not the root, have exactly one parent.</p>
-   <div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (use "OneParent")</br>
-  Using lemma OneParent,</br>
-  this simplifies to: </br>
-  NoDirAliases.2 :  </br>
-  </br>
-  {-1}  ( (oh_1 !in Root) => ( (one (oh_1 . parent) ) && (one (contents . oh_1) ) ) )</br>
-    |-------</br>
-  [1]   (oh_1 in Root)</br>
-  [2]   (lone (contents . oh_1) )</br>
-   </br>
-	   Rule?</div></div>
-	<p>Since one P => lone P is another pre-loaded lemma, we can close the branch applying (grind). Since there are no others open branches, the proof is completed.</p><div class="panel-tutorial"><div class="panel-body-tutorial">Rule? (grind)</br>
-  ...</br>
-  Trying repeated skolemization, instantiation, and if-lifting,</br>
-  </br>
-  This completes the proof of file_system?NoDirAliases.2.</br>
-  </br>
-	Q.E.D.</div></div>
-   		</div>
-    </div>
-  </div>
-</div>
-</div>
+<body>
 
-<div id="footer">
-  <div class="container text-center">
-    <div class="fnav">
-      <p>Copyright &copy; DYNAMITE. Designed by Azul Lopez</p>
-<!--		<p>Copyright &copy; 2016 Spectrum. Designed by <a href="http://www.templatewire.com" rel="nofollow">TemplateWire</a></p>-->
+<!-- NAVIGATION BAR -->
+<nav class="dock" aria-label="Main">
+  <a href="index.html" class="dock-item hide-tablet">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h4.5v-6h4v6h4.5V10"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Home</div></div>
+  </a>
+  <a href="index.html#about" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.5-7 8-7s8 2.8 8 7"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">About</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">About</div></div>
+  </a>
+  <a href="index.html#publications" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3.5"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Publications</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Papers</div></div>
+  </a>
+  <a href="index.html#download" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Download</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Download</div></div>
+  </a>
+  <a href="#page-top" class="dock-item is-current" aria-current="page">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Tutorial</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Tutorial</div></div>
+  </a>
+  <a href="index.html#contact" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 8 8 5.5L20 8"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Contact</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Contact</div></div>
+  </a>
+</nav>
+
+<main id="page-top">
+
+  <header class="t-hero">
+    <div class="t-top t-fade">
+      <a href="index.html" aria-label="Dynamite – home">
+        <div class="logo-slot">
+          <img src="img/logo.svg" alt="" onerror="this.remove()">
+          <span>logo</span>
+        </div>
+        <div class="name">Dynamite <span>Proving System</span></div>
+      </a>
     </div>
-  </div>
-</div>
-<script type="text/javascript" src="js/jquery.1.11.1.js"></script> 
-<script type="text/javascript" src="js/bootstrap.js"></script> 
-<script type="text/javascript" src="js/SmoothScroll.js"></script> 
-<script type="text/javascript" src="js/nivo-lightbox.js"></script> 
-<script type="text/javascript" src="js/jquery.isotope.js"></script> 
-<script type="text/javascript" src="js/jqBootstrapValidation.js"></script> 
-<script type="text/javascript" src="js/contact_me.js"></script> 
-<script type="text/javascript" src="js/main.js"></script>
+
+    <div class="t-bottom">
+      <h1 class="t-title" aria-label="Tutorial">
+        <span class="line-clip" aria-hidden="true"><span class="display-text" data-split>Tutorial</span></span>
+      </h1>
+      <p class="t-lead t-fade">This simple tutorial will help you with the first steps in Dynamite. It will guide you in opening the system for first time and closing your first proof. Please send any comments and/or problems to <a href="mailto:mmoscato@dc.uba.ar">mmoscato@dc.uba.ar</a>.</p>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section class="section reveal" id="getting-started">
+    <h2>Getting started</h2>
+    <div class="body">
+      <p>First download the Alloy specification we will use in order to explain the basic DPS commands. (This Alloy specification is based on the model example "file_system.als" that can be found in the Alloy Analyzer distribution.)</p>
+      <a class="btn" href="https://dynamiteprovingsystem.github.io/download/file_system.als" download>Download Alloy Model</a>
+      <p>Then you may want to create a working directory, in which the Alloy specification must be placed. Once in that directory, to run the tool you only have to execute the shell script <code>dps</code>, that can be found in the root of the installation. For example, if the Dynamite Proving System was installed in the directory <code>/opt/dps</code> you may run the script by typing</p>
+      <div class="codeblock"><pre class="code">~tutorial$ /opt/dps/dps</pre></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="section reveal" id="loading">
+    <h2>Loading the specification</h2>
+    <div class="body">
+      <p>To load the Alloy specification, it is necessary to invoke the DPS command <code>open-alloy-file</code>. To do this, as usual in Emacs systems, you must hold the meta key (generally mapped to the Alt key) and press the <code>x</code> key, then you must type the name of the command: <code>open-alloy-file</code>. This kind of invocations will be abbreviated as</p>
+      <div class="codeblock"><pre class="code">M-x open-alloy-file</pre></div>
+      <p>Then, the system will ask for the name of the Alloy file to be loaded. The specification will be shown in the current Emacs buffer.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="section reveal" id="proving">
+    <h2>Proving the assertion NoDirAliases</h2>
+    <div class="body">
+      <p>To initiate the proof of an assertion, you must invoke the command</p>
+      <div class="codeblock"><pre class="code">M-x prove-alloy-assert</pre></div>
+      <p>Then, the system will ask for the name of the assertion to be proved. Type <code>NoDirAliases</code>, because this is the name of the assertion we will prove.</p>
+
+      <p>A message will appear indicating whether the underlying theories needed to prove the assertion could be correctly generated. If an error occurs during that process, it will be reported in the Emacs buffer called <code>DynamiteTranslator output</code>. To switch to this buffer, you may press the <code>x</code> key while holding the Ctrl key, then press the <code>b</code> key and after that enter the name of the buffer</p>
+      <div class="codeblock"><pre class="code">C-x b DynamiteTranslator output</pre></div>
+
+      <p>After this, the main goal will be displayed in the <code>*pvs*</code> buffer. In this case, you will see the following</p>
+      <div class="codeblock"><pre class="code">NoDirAliases :
+
+|-------
+{1} (all O : Dir| (lone (contents . O) ) )
+Rule?</pre></div>
+
+      <p>As in PVS, the user commands are typed in the <code>Rule?</code> prompt. The first command we will introduce, will be <code>(skosimp*)</code> to skolemize the quantified variables.</p>
+      <div class="codeblock"><pre class="code">Rule? (skosimp*)
+Repeatedly Skolemizing and flattening,
+this simplifies to:
+NoDirAliases :
+
+|-------
+{1} (lone (contents . oh_1)
+Rule?</pre></div>
+
+      <p>The quantified variables have been replaced by fresh new constants. Now, we want to introduce the case in which <code>oh_1</code> is the root directory. To do that, we will use the command <code>dps-case</code>. This command application yields two subgoals: <code>NoDirAliases.1</code> and <code>NoDirAliases.2</code>. The former has the Alloy formula <code>oh_1 in Root</code> as a new hypothesis.</p>
+      <div class="codeblock"><pre class="code">Rule? (dps-case "oh_1 in Root")
+Translating the formula.
+
+...
+
+Formula translated.
+Introducing case...,
+this yields 2 subgoals:
+NoDirAliases.1 :
+
+{-1} (oh_1 in Root)
+|-------
+[1] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>At this point, we want to use the Alloy fact <code>RootHasNoParent</code> as another hypothesis in the proof. This fact is part of the same specification we loaded earlier, and states that the root directory has no parent.</p>
+      <div class="codeblock"><pre class="code">fact RootHasNoParent { all r: Root | no r.parent }</pre></div>
+
+      <p>To do this, we type <code>(use "RootHasNoParent")</code> at the <code>Rule?</code> prompt.</p>
+      <div class="codeblock"><pre class="code">Rule? (use "RootHasNoParent")
+...
+Using lemma RootHasNoParent,
+this yields 2 subgoals:
+NoDirAliases.1.1 :
+
+{-1} (no (oh_1 . parent) )
+[-2] (oh_1 in Root)
+|-------
+[1] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>This command application opens a new branch in which we will have to prove that <code>oh_1</code> is the root directory. On the other hand, to close the current branch we need to use the following fact, that establish the relation between the parent and the contents of a directory.</p>
+      <div class="codeblock"><pre class="code">fact ParentDefinition { all d: Dir | d.parent = (contents.d) . Name }</pre></div>
+
+      <p>As before, this fact is introduced as a new hypothesis by applying the <code>use</code> command.</p>
+      <div class="codeblock"><pre class="code">Rule? (use "ParentDefinition")
+Using lemma ParentDefinition,
+this simplifies to:
+NoDirAliases.1.1 :
+
+{-1} ( (oh_1 . parent) = ( (contents . oh_1) . Name) )
+[-2] (no (oh_1 . parent) )
+[-3] (oh_1 in Root)
+|-------
+[1] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>Now, the hypotheses we have in the current goal can be used to prove that the set denoted by <code>( (contents . oh_1) . Name)</code> is empty. Would it be the case that this assertion is sufficient to prove that <code>contents . oh_1</code> is also empty?</p>
+      <p>We can use the Alloy Analyzer to search for counter examples of that implication. To do this, the command <code>dps-hyp</code> must be used.</p>
+      <div class="codeblock"><pre class="code">Rule? (dps-hyp "no ( (contents.oh_1) . Name) =&gt; no contents.oh_1")
+Trying to validate the formula with models of size 3.
+No counter-example found in that scope. Formula translated.
+Introducing case...,
+this yields 2 subgoals:
+NoDirAliases.1.1.1 :
+
+{-1} ( (no ( (contents . oh_1) . Name) ) =&gt; (no (contents . oh_1) ) )
+[-2] ( (oh_1 . parent) = ( (contents . oh_1) . Name) )
+[-3] (no (oh_1 . parent) )
+[-4] (oh_1 in Root)
+|-------
+[1] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>Since no counterexample was found, the formula is introduced as a hypothesis in this branch, and a new branch is opened, where this formula is stated as an obligation to be proved.</p>
+      <p>The current branch can be closed by applying the command <code>(reduce)</code>, since <code>no P =&gt; lone P</code> is a known property (loaded when the proof begins).</p>
+      <div class="codeblock"><pre class="code">Rule? (reduce)
+ParentDefinition rewrites (oh_1 . parent)
+to ( (contents . oh_1) . Name)
+NoneImpliesLone rewrites (lone (contents . oh_1) )
+to TRUE
+Repeatedly simplifying with decision procedures, rewriting,
+propositional reasoning, quantifier instantiation, skolemization,
+if-lifting and equality replacement,
+
+This completes the proof of NoDirAliases.1.1.1.</pre></div>
+
+      <p>Then, the system automatically shows us the next open branch. In this case, the branch opened when the <code>dps-case</code> was applied.</p>
+      <p>Now we can use the Alloy assertion <code>Lemma1</code>, present in the specification, as a lemma to close this branch.</p>
+      <div class="codeblock"><pre class="code">Rule? (use "Lemma1")
+Using lemma Lemma1,
+
+This completes the proof of NoDirAliases.1.1.2.
+
+This completes the proof of NoDirAliases.1.1.</pre></div>
+
+      <p>To close the next open branch we need to prove that <code>oh_1</code> is the root directory.</p>
+      <div class="codeblock"><pre class="code">NoDirAliases.1.2 (TCC):
+
+[-1] (oh_1 in Root)
+|-------
+{1} ( (one oh_1) &amp;&amp; (oh_1 in Root) )
+[2] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>As the sequent formula -1 is part of the conjunction in 1, we only have to focus our effort in prove that the other part of 1 also holds. To do that, we only need to use the predicates that characterize the constant <code>oh_1</code>.</p>
+      <div class="codeblock"><pre class="code">Rule? (typepred "oh_1")
+...
+Adding type constraints for oh_1,
+this simplifies to:
+NoDirAliases.1.2 :
+
+{-1} ( (one oh_1) &amp;&amp; (oh_1 in Dir) )
+[-2] (oh_1 in Root)
+|-------
+{1} (one oh_1)
+[2] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>Just by applying the command <code>(prop)</code> this branch can be closed.</p>
+      <div class="codeblock"><pre class="code">Rule? (prop)
+...
+This completes the proof of file_system?NoDirAliases.1.2.
+
+This completes the proof of file_system?NoDirAliases.1.</pre></div>
+
+      <p>Now we have to prove the branch opened when we introduced the case in which <code>oh_1</code> is the root directory. The following goal can be interpreted as the case in which <code>oh_1</code> is a directory but it is not the root.</p>
+      <div class="codeblock"><pre class="code">file_system?NoDirAliases.2 :
+
+|-------
+{1} (oh_1 in Root)
+[2] (lone (oh_1 . parent!1) )
+
+Rule?</pre></div>
+
+      <p>To close this branch, we would like to use the Alloy fact <code>OneParent</code> as a lemma. This fact establish that every directory that is not the root, have exactly one parent.</p>
+      <div class="codeblock"><pre class="code">Rule? (use "OneParent")
+Using lemma OneParent,
+this simplifies to:
+NoDirAliases.2 :
+
+{-1} ( (oh_1 !in Root) =&gt; ( (one (oh_1 . parent) ) &amp;&amp; (one (contents . oh_1) ) ) )
+|-------
+[1] (oh_1 in Root)
+[2] (lone (contents . oh_1) )
+
+Rule?</pre></div>
+
+      <p>Since <code>one P =&gt; lone P</code> is another pre-loaded lemma, we can close the branch applying <code>(grind)</code>. Since there are no others open branches, the proof is completed.</p>
+      <div class="codeblock"><pre class="code">Rule? (grind)
+...
+Trying repeated skolemization, instantiation, and if-lifting,
+
+This completes the proof of file_system?NoDirAliases.2.
+
+Q.E.D.</pre></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© Dynamite &nbsp;·&nbsp; Designed by Azul Lopez &nbsp;·&nbsp; Powered by Claude<span class="fcur" aria-hidden="true">_</span></span>
+    <a href="#page-top" id="toTop">Back to top ↑</a>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+<script>
+  const root = document.documentElement;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const appHeight = () => root.style.setProperty('--app-height', innerHeight + 'px');
+  addEventListener('resize', appHeight); appHeight();
+
+  /* Lenis smooth scroll (optional) */
+  let lenis = null;
+  if (window.Lenis && !reduceMotion) {
+    lenis = new Lenis({ duration: 1.2, easing: t => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
+    const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+  }
+  const goTop = () => lenis ? lenis.scrollTo(0) : scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('toTop').addEventListener('click', e => { e.preventDefault(); goTop(); });
+  document.querySelector('.dock-item.is-current').addEventListener('click', e => { e.preventDefault(); goTop(); });
+
+  /* split text into words > chars */
+  function splitChars(el){
+    const text = el.textContent;
+    el.textContent = '';
+    text.split(' ').forEach((w, wi, arr) => {
+      const word = document.createElement('span');
+      word.className = 'word';
+      [...w].forEach(c => { const ch = document.createElement('span'); ch.className = 'char'; ch.textContent = c; word.appendChild(ch); });
+      el.appendChild(word);
+      if (wi < arr.length - 1) el.appendChild(document.createTextNode(' '));
+    });
+  }
+  document.querySelectorAll('[data-split]').forEach(splitChars);
+
+  /* dock labels (small screens): chars slide up one by one */
+  document.querySelectorAll('[data-chars]').forEach(el => {
+    const txt = el.textContent.trim();
+    el.setAttribute('aria-label', txt);
+    el.innerHTML = '<span class="word" style="display:inline-block" aria-hidden="true">' +
+      [...txt].map((c, i) => `<span class="char" style="--c:${i}">${c}</span>`).join('') + '</span>';
+  });
+
+  /* entrance: title rises letter by letter, then the rest fades in and the dock slides up */
+  if (window.gsap && !reduceMotion) {
+    const chars = [...document.querySelectorAll('.t-title .char')];
+    gsap.set(chars, { yPercent: 105 });
+    gsap.set('.t-title', { visibility: 'visible' });
+    gsap.timeline({ defaults: { ease: 'power2.inOut', duration: .9 }, onComplete: () => root.classList.add('ready') })
+      .to(chars, { yPercent: 0, duration: 1.1, ease: 'power3.out', stagger: { amount: .35 } })
+      .to('.t-fade', { opacity: 1, y: 0, stagger: .12, duration: .8, ease: 'power2.out' }, '-=.7');
+    gsap.set('.t-fade', { y: 16 });
+  } else {
+    root.classList.add('ready', 'no-anim');
+  }
+
+  /* copy buttons on every code block */
+  document.querySelectorAll('.codeblock').forEach(block => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy'; btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy code');
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(block.querySelector('pre').textContent);
+        btn.textContent = 'Copied';
+      } catch (e) { btn.textContent = 'Press Ctrl+C'; }
+      setTimeout(() => btn.textContent = 'Copy', 1400);
+    });
+    block.appendChild(btn);
+  });
+
+  /* reveal on scroll */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
 </body>
 </html>

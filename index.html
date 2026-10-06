@@ -1,316 +1,668 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DYNAMITE</title>
-<meta name="description" content="Dynamite-webpage">
-<meta name="author" content="Azul Lopez">
+<title>Dynamite – Proving System</title>
+<meta name="description" content="Dynamite extends PVS to verify Alloy models: semi-automatic verification through theorem proving.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dynamite – Proving System">
+<meta property="og:description" content="Dynamite extends PVS to verify Alloy models: semi-automatic verification through theorem proving.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dynamite – Proving System">
+<meta name="twitter:description" content="Dynamite extends PVS to verify Alloy models: semi-automatic verification through theorem proving.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<!-- Marks the page as JS-enabled so the intro can keep things hidden until it starts (no flicker) -->
+<script>document.documentElement.className += ' js';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#1f1f1f;
+    --card-hover:#101010;
+    --text:#ffffff;
+    --muted:#8f8f8f;
+    --gap:16px;
+    --radius:8px;
+    --ease:cubic-bezier(.7,0,.2,1);
+    --app-height:100svh;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  ::selection{background:rgba(255,255,255,.1);color:#fff}
+  ::-webkit-scrollbar{width:0;display:none !important}
+  html,body{
+    width:100%;height:auto;min-height:100%;
+    -ms-overflow-style:none;scrollbar-width:none;
+  }
 
-<!-- Favicons
-    ================================================== -->
-<link rel="icon" 
-      type="image/png" 
-      href="img/LogoDyn-small.png">	
-<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="72x72" href="img/apple-touch-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png">
+  /* Lenis smooth scroll */
+  html.lenis{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto}
+  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+  .lenis.lenis-stopped{overflow:hidden}
+  .lenis.lenis-scrolling iframe{pointer-events:none}
 
-<!-- Bootstrap -->
-<link rel="stylesheet" type="text/css"  href="css/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="fonts/font-awesome/css/font-awesome.css">
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:clamp(16px,1.2vw,19px);line-height:1.5;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  a{color:inherit;text-decoration:none}
+  .word,.char{display:inline-block}
 
-<!-- Stylesheet
-    ================================================== -->
-<link rel="stylesheet" type="text/css"  href="css/style.css">
-<link rel="stylesheet" type="text/css" href="css/nivo-lightbox/nivo-lightbox.css">
-<link rel="stylesheet" type="text/css" href="css/nivo-lightbox/default.css">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,600,300' rel='stylesheet' type='text/css'>
-<script type="text/javascript" src="js/modernizr.custom.js"></script>
+  /* ---------- LOGO SLOT ---------- */
+  /* Logo lives at img/logo.svg (favicon: img/favicon.svg) */
+  .logo-slot{
+    flex:none;display:flex;align-items:center;justify-content:center;
+    border:1px dashed #3a3a3a;border-radius:var(--radius);
+    color:var(--muted);font-size:12px;text-align:center;overflow:hidden;
+  }
+  .logo-slot:has(img){border:none}   /* dashed placeholder only shows if the logo file is missing */
+  .logo-slot img{width:100%;height:100%;object-fit:contain;display:block}
+  .logo-slot img + span{display:none}
+  .logo-slot.is-big{width:clamp(72px,9vw,120px);height:clamp(72px,9vw,120px)}
 
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+  /* ---------- HOME HERO: bento grid + giant titles ---------- */
+  main{padding:var(--gap) var(--gap) 96px;display:flex;flex-direction:column;gap:var(--gap)}
+  .hero-wrap{position:relative}
+
+  .bento{
+    display:grid;gap:var(--gap);
+    grid-template-columns:repeat(12,1fr);
+    grid-template-rows:repeat(4,1fr);
+    height:calc(var(--app-height) - 2*var(--gap));
+    min-height:560px;
+  }
+  .js .bento{visibility:hidden}                 /* revealed by the intro */
+  .js.no-intro .bento{visibility:visible}
+
+  .tile{
+    position:relative;display:flex;align-items:flex-end;
+    padding:0 0 24px 24px;
+    background:var(--card);border-radius:var(--radius);
+    transform-origin:50% 50%;
+    transition:background .5s ease;
+  }
+  a.tile:hover,a.tile:focus-visible{background:var(--card-hover)}
+  /* while a giant title is showing, everything else fades into the dark */
+  .hero-wrap.is-dim .tile{background:#050505}
+  body{transition:background-color .5s ease}
+  html.is-dim body{background:#000}
+  .label-clip{transition:opacity .5s ease}
+  .hero-wrap.is-dim .label-clip{opacity:.1}   /* card names step aside so they don't clash with the giant title */
+  a.tile:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .g-about,.g-pubs,.g-dl,.g-tut{grid-row:1 / -1}
+  .g-about{grid-column:1 / span 3}
+  .g-pubs {grid-column:4 / span 3}
+  .g-dl   {grid-column:7 / span 3}
+  .g-tut  {grid-column:10 / span 3}
+
+  /* card label: two stacked copies inside a clip, they roll up on hover */
+  .label-clip{position:relative;overflow:hidden;height:1.5em;line-height:1.5;pointer-events:none}
+  .label-text{height:1.5em;white-space:nowrap}
+
+  /* giant titles (centered over the grid) */
+  .hero-stage{
+    position:absolute;inset:0;z-index:3;pointer-events:none;
+    display:grid;place-items:center;overflow:hidden;border-radius:var(--radius);
+  }
+  .intro-name,.hover-titles{grid-area:1/1}
+  .js .intro-name{visibility:hidden}
+  .intro-name{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,2vw,28px)}
+  .hero-name{display:flex;flex-direction:row;justify-content:center}
+  .hover-titles{display:grid;place-items:center}
+  .hover-title{grid-area:1/1;display:none;text-align:center}
+  .line-clip{overflow:hidden;padding:.02em 0 .1em;margin-bottom:-.1em}
+  .display-text{
+    display:block;font-weight:500;white-space:nowrap;
+    font-size:clamp(5rem,16vw,16rem);
+    line-height:.88;letter-spacing:-.05em;
+  }
+  @media (max-width:991px){
+    .bento{height:auto;min-height:0;grid-template-rows:none;grid-auto-rows:minmax(160px,26svh)}
+    .g-about{grid-column:span 5;grid-row:auto}
+    .g-pubs{grid-column:span 7;grid-row:auto}
+    .g-dl{grid-column:span 6;grid-row:auto}
+    .g-tut{grid-column:span 6;grid-row:auto}
+    .hover-titles{display:none !important}
+  }
+  @media (max-width:600px){
+    .hero-name{flex-direction:column;align-items:center}
+    .display-text{font-size:35vw}
+  }
+
+  /* ---------- NAV BAR (floating dock) ---------- */
+  .dock{
+    position:fixed;left:50%;bottom:var(--gap);z-index:80;
+    transform:translateX(-50%);
+    display:flex;align-items:center;gap:4px;padding:6px;
+    background:rgba(31,31,31,.82);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.06);border-radius:12px;
+    transition:transform .9s var(--ease);
+  }
+  .js:not(.dock-on) .dock{transform:translateX(-50%) translateY(calc(100% + 32px))}
+  .dock-item{
+    position:relative;display:flex;align-items:center;
+    height:44px;padding:0 12px;border-radius:8px;color:var(--text);
+  }
+  .dock-item:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .dock-item__bg{
+    position:absolute;inset:0;border-radius:8px;background:#fff;opacity:0;
+    transition:opacity .3s ease;
+  }
+  .dock-item:hover .dock-item__bg{opacity:.08}
+  .dock-item.is-current .dock-item__bg{opacity:.14}
+  .dock-icon{
+    position:relative;width:20px;height:20px;flex:none;opacity:.7;
+    transition:opacity .3s ease,transform .5s var(--ease);
+  }
+  .dock-item:hover .dock-icon,.dock-item.is-current .dock-icon{opacity:1}
+  /* dock magnification: hovered icon grows, its neighbours grow a little */
+  .dock-item:hover .dock-icon{transform:translateY(-2px) scale(1.3)}
+  .dock-item:hover + .dock-item .dock-icon,
+  .dock-item:has(+ .dock-item:hover) .dock-icon{transform:translateY(-1px) scale(1.1);opacity:.9}
+  .dock-icon svg{display:block;width:100%;height:100%}
+
+  /* label: only on small screens (like the reference); chars slide up one by one */
+  .dock-label{
+    position:relative;overflow:hidden;white-space:nowrap;
+    max-width:0;margin-left:0;
+    transition:max-width .6s var(--ease),margin-left .6s var(--ease);
+  }
+  .dock-item.is-current .dock-label{max-width:140px;margin-left:10px}
+  .dock-label .dock-text{font-size:15px;font-weight:500;line-height:1.3}
+  .dock-label .char{display:inline-block;transform:translateY(110%);transition:transform .55s var(--ease);transition-delay:calc(var(--c,0)*28ms)}
+  .dock-item.is-current .dock-label .char{transform:none}
+  @media (min-width:992px){.dock-item .dock-label{display:none}}
+
+  /* tooltip */
+  .dock-tip{
+    position:absolute;left:50%;bottom:calc(100% + 18px);
+    transform:translate(-50%,6px);opacity:0;pointer-events:none;
+    background:#fff;color:#000;border-radius:6px;padding:4px 10px;
+    white-space:nowrap;font-size:13px;font-weight:500;
+    transition:opacity .25s ease,transform .35s var(--ease);
+  }
+  .dock-item:hover .dock-tip{opacity:1;transform:translate(-50%,0)}
+  @media (max-width:991px){.dock-item.hide-tablet{display:none}.dock-tip{display:none}}
+  @media (max-width:420px){.dock-item{padding:0 10px}.dock-item.is-current .dock-label{max-width:110px}}
+  @media (hover:none){.dock-tip{display:none}}
+
+  /* ---------- SECTIONS ---------- */
+  .section{
+    background:var(--card);border-radius:var(--radius);
+    padding:clamp(24px,5vw,64px);
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:32px 64px;
+    scroll-margin-top:var(--gap);
+  }
+  .section h2{font-weight:500;font-size:clamp(36px,6vw,88px);line-height:.95;letter-spacing:-.04em}
+  .section .body{display:flex;flex-direction:column;gap:18px;max-width:760px}
+  .section p{color:#cfcfcf}
+  .section p strong{color:var(--text);font-weight:500}
+  @media (max-width:860px){.section{grid-template-columns:1fr}}
+
+  ul.plain{list-style:none;display:flex;flex-direction:column}
+  ul.plain li{border-top:1px solid #333}
+  ul.plain li:last-child{border-bottom:1px solid #333}
+  ul.plain a{display:flex;justify-content:space-between;gap:24px;align-items:baseline;padding:18px 0;transition:padding .25s ease}
+  ul.plain a:hover{padding-left:12px}
+  ul.plain .year{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+
+  ol.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:12px}
+  /* number sits in the margin; the text (with its <code> pieces) stays one flowing paragraph */
+  ol.steps li{counter-increment:s;position:relative;padding-left:2.6em;color:#cfcfcf}
+  ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;color:var(--muted);font-variant-numeric:tabular-nums}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:#2b2b2b;padding:2px 6px;border-radius:4px;color:#fff}
+  .reqs{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#2b2b2b;border-radius:999px;padding:6px 14px;font-size:14px}
+  .btn{
+    align-self:flex-start;background:var(--text);color:#000;border-radius:999px;
+    padding:12px 22px;font-weight:500;transition:transform .2s ease,background .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px);background:#e8e8e8}
+
+  /* contact form */
+  .field{display:flex;flex-direction:column;gap:8px}
+  .field label{font-size:14px;color:var(--muted)}
+  .field input,.field textarea{
+    font:inherit;color:var(--text);background:#151515;border:1px solid #333;border-radius:12px;
+    padding:14px 16px;width:100%;transition:border-color .2s ease,background .2s ease;
+  }
+  .field textarea{min-height:150px;resize:vertical}
+  .field input:hover,.field textarea:hover{border-color:#4a4a4a}
+  .field input:focus-visible,.field textarea:focus-visible{outline:none;border-color:#fff;background:#111}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:600px){.field-row{grid-template-columns:1fr}}
+  .form-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  button.btn{border:0;font:inherit;font-weight:500;cursor:pointer}
+  .contact-head{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .mail-copy{
+    display:inline-flex;align-items:center;gap:10px;flex-wrap:nowrap;white-space:nowrap;max-width:100%;
+    font:inherit;color:var(--text);background:#151515;border:1px solid #333;border-radius:999px;
+    padding:8px 14px;cursor:pointer;transition:border-color .2s ease,background .2s ease;
+  }
+  .mail-copy:hover{border-color:#4a4a4a;background:#1b1b1b}
+  .mail-copy:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .mail-addr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;text-align:left}
+  .mail-hint{font-size:12px;color:var(--muted);padding-left:10px;border-left:1px solid #333}
+  .mail-copy.copied .mail-hint{color:#fff}
+  .form-note{color:var(--muted);font-size:14px;min-height:1.4em}
+
+  footer .fcur{color:#fff;margin-left:1px;animation:fcur-blink 1s steps(2,start) infinite}
+  @keyframes fcur-blink{to{visibility:hidden}}
+  @media (prefers-reduced-motion:reduce){footer .fcur{animation:none}}
+  footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:8px 24px 24px;color:var(--muted);font-size:14px}
+
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+  }
+</style>
 </head>
-<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
-<!-- Navigation
-    ==========================================-->
-<nav id="menu" class="navbar navbar-default navbar-fixed-top">
-  <div class="container"> 
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-			<a class="navbar-brand page-scroll" href="#page-top">
-			<img src="./img/LogoDyn-small-white.png" alt="logo" class="logo">Dynamite
-			</a>
-	  </div>
-    
-	  <!-- "<i class="fa fa-play fa-rotate-270"></i>  -->
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#page-top" class="page-scroll">Home</a></li>
-        <li><a href="#about" class="page-scroll">About</a></li>
-        <li><a href="#portfolio" class="page-scroll">Publications</a></li>
-        <li><a href="#req" class="page-scroll">Download</a></li>
-        <li><a href="tutorial.html" class="page-scroll">Tutorial</a></li>
-<!--        <li><a href="#contact" class="page-scroll">Contact</a></li>-->
+<body>
+
+<!-- NAVIGATION BAR -->
+<nav class="dock" aria-label="Main">
+  <a href="#page-top" class="dock-item hide-tablet is-current" aria-current="page">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h4.5v-6h4v6h4.5V10"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Home</div></div>
+  </a>
+  <a href="#about" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.5-7 8-7s8 2.8 8 7"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">About</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">About</div></div>
+  </a>
+  <a href="#publications" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3.5"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Publications</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Papers</div></div>
+  </a>
+  <a href="#download" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Download</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Download</div></div>
+  </a>
+  <a href="tutorial.html" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Tutorial</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Tutorial</div></div>
+  </a>
+  <a href="#contact" class="dock-item">
+    <div class="dock-item__bg"></div>
+    <div class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 8 8 5.5L20 8"/></svg></div>
+    <div class="dock-tip"><div class="dock-text">Contact</div></div>
+    <div class="dock-label"><div data-chars class="dock-text">Contact</div></div>
+  </a>
+</nav>
+
+<main id="page-top">
+
+  <!-- HOME: intro + bento grid + giant hover titles -->
+  <section class="hero-wrap" aria-label="Dynamite">
+    <div class="bento">
+      <a class="tile g-about" href="#about" aria-label="About">
+        <div class="label-clip" aria-hidden="true"><div class="label-text" data-split>About</div><div class="label-text" data-split>About</div></div>
+      </a>
+      <a class="tile g-pubs" href="#publications" aria-label="Publications">
+        <div class="label-clip" aria-hidden="true"><div class="label-text" data-split>Publications</div><div class="label-text" data-split>Publications</div></div>
+      </a>
+      <a class="tile g-dl" href="#download" aria-label="Download">
+        <div class="label-clip" aria-hidden="true"><div class="label-text" data-split>Download</div><div class="label-text" data-split>Download</div></div>
+      </a>
+      <a class="tile g-tut" href="tutorial.html" aria-label="Tutorial">
+        <div class="label-clip" aria-hidden="true"><div class="label-text" data-split>Tutorial</div><div class="label-text" data-split>Tutorial</div></div>
+      </a>
+    </div>
+
+    <div class="hero-stage">
+      <!-- intro: logo + name -->
+      <div class="intro-name">
+        <div class="logo-slot is-big hero-logo" aria-label="Dynamite logo">
+          <img src="img/logo.svg" alt="Dynamite logo" onerror="this.remove()">
+          <span>logo</span>
+        </div>
+        <h1 class="hero-name" aria-label="Dynamite">
+          <span class="line-clip" aria-hidden="true"><span class="display-text" data-split>Dyna</span></span>
+          <span class="line-clip" aria-hidden="true"><span class="display-text" data-split>mite</span></span>
+        </h1>
+      </div>
+
+      <!-- giant titles shown on card hover (same order as the cards) -->
+      <div class="hover-titles" aria-hidden="true">
+        <div class="hover-title"><div class="line-clip"><div class="display-text" data-split>About</div></div></div>
+        <div class="hover-title">
+          <div class="line-clip"><div class="display-text" data-split>Publi-</div></div>
+          <div class="line-clip"><div class="display-text" data-split>cations</div></div>
+        </div>
+        <div class="hover-title"><div class="line-clip"><div class="display-text" data-split>Download</div></div></div>
+        <div class="hover-title"><div class="line-clip"><div class="display-text" data-split>Tutorial</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="about">
+    <h2>About</h2>
+    <div class="body">
+      <p><strong>Dynamite</strong> is a verification tool that extends <strong>PVS</strong> (Prototype Verification System) to provide comprehensive analysis of <strong>Alloy</strong> models.</p>
+      <p>It bridges the gap between the Alloy Analyzer's partial automatic verification and formal theorem proving, enabling semi-automatic verification for critical applications that require conclusive results.</p>
+      <div class="reqs">
+        <span class="chip">Alloy Analyzer + PVS integration</span>
+        <span class="chip">Unsat-core extraction</span>
+        <span class="chip">Automatic hypothesis analysis</span>
+        <span class="chip">Sequent refinement</span>
+        <span class="chip">Witness generation for existential formulas</span>
+        <span class="chip">Early error detection</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="publications">
+    <h2>Publi&shy;cations</h2>
+    <div class="body">
+      <ul class="plain">
+        <li><a href="https://dynamiteprovingsystem.github.io/img/DynDocuments/dps-tosem2014.pdf"><span>Dynamite: A Tool for the Verification of Alloy Models Based on PVS</span><span class="year">TOSEM 2014</span></a></li>
+        <li><a href="https://dynamiteprovingsystem.github.io/img/DynDocuments/dps-phd2013.pdf"><span>Improvements to Interactive Theorem Proving of Alloy Properties Using SAT-Solving (PhD thesis)</span><span class="year">2013</span></a></li>
+        <li><a href="https://dynamiteprovingsystem.github.io/img/DynDocuments/dps-ictac2010.pdf"><span>Dynamite 2.0: New Features Based on UnSAT-Core Extraction to Improve Verification of Software Requirements</span><span class="year">ICTAC 2010</span></a></li>
+        <li><a href="https://dynamiteprovingsystem.github.io/img/DynDocuments/dps-apv2009.pdf"><span>Lessons Learned on the Verification of Models Using Dynamite</span><span class="year">APV 2009</span></a></li>
+        <li><a href="https://dynamiteprovingsystem.github.io/img/DynDocuments/dps-tacas2007.pdf"><span>Alloy Analyzer + PVS in the Analysis and Verification of Alloy Specifications</span><span class="year">TACAS 2007</span></a></li>
       </ul>
     </div>
-    <!-- /.navbar-collapse --> 
-  </div>
-  <!-- /.container-fluid --> 
-</nav>
-<!-- Header -->
-<header id="header">
-  <div class="intro">
-    <div class="container">
-      <div class="row">
-        <div class="intro-text">
-          <h1>Dynamite</h1>
-          <h2> Proving System </h2>
-          <a href="#about" class="btn btn-custom btn-lg page-scroll">Learn More</a> </div>
-      </div>
-    </div>
-  </div>
-</header>
-<!-- About Section -->
-<div id="about">
-  <div class="container">
-    <div class="section-title text-center center">
-      <h2>About Dynamite</h2>
-      <hr>
-    </div>
-    <div class="row">
-      <div class="col-xs-12 col-md-6"> <img src="img/LogoDyn-small.png" class="img-responsive" alt=""> </div>
-      <div class="col-xs-12 col-md-6">
-        <div class="about-text"><br/><br/><br/>
-          <p>Automatic analysis of Alloy models is supported by the Alloy Analyzer, a tool that translates an Alloy model to a propositional formula that is then analyzed using off-the-shelf SAT solvers. The translation requires user-provided bounds on the sizes of data domains. The analysis is limited by the bounds and is therefore partial. Thus, the Alloy Analyzer may not be appropriate for the analysis of critical applications where more conclusive results are necessary. Dynamite is an extension of PVS that embeds a complete calculus for Alloy. It also includes extensions to PVS that allow one to improve the proof effort by, for instance, automatically analyzing new hypotheses with the aid of the Alloy Analyzer. Since PVS sequents may get cluttered with unnecessary formulas, we use the Alloy unsat-core extraction feature in order to refine proof sequents. An internalization of Alloy's syntax as an Alloy specification allows us to use the Alloy Analyzer for producing witnesses for proving existentially quantified formulas. Dynamite complements the partial automatic analysis offered by the Alloy Analyzer with semi-automatic verification through theorem proving. It also improves the theorem proving experience by using the Alloy Analyzer for early error detection, sequent refinement, and witness generation. </p>
-          <a href="#req" class="btn btn-default btn-lg page-scroll">Download and Installation</a> </div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Download and Installation -->
-<div id="portfolio">
-  <div class="container">
-    <div class="section-title text-center center">
-      <h2>Publications</h2>
-      <hr>
-    </div>
-    <div class="categories">
-     <!-- <ul class="cat">
-        <li>
-          <ol class="type">
-            <li><a href="#" data-filter=".web">Works Related</a></li>
-            <li><a href="#" data-filter=".photography">Requirements</a></li>
-            <li><a href="#" data-filter=".product">Product Design</a></li>
-          </ol>
-        </li>
-      </ul>-->
-      <div class="clearfix"></div>
-    </div>
-    <div class="row">
-      <div class="portfolio-items">
-       
-        <!-- in Document Section is used web class  -->       
+  </section>
 
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> 
-			 <a href="img/DynDocuments/dps-tosem2014.pdf">
-              <div class="hover-text">
-                <h4 class="smallHoverText">Dynamite: A Tool for the Verification of Alloy Models Based on PVS-TOSEM-2014</h4>
-              </div>
-			 </a>
-              <img src="img/portfolio/Dynamite- A Tool for the Verification of Alloy Models Based on PVS-TOSEM-2014.jpg" class="img-responsive" alt="Project Title"></div>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> 
-		     <a href="img/DynDocuments/dps-phd2013.pdf">
-              <div class="hover-text">
-                <h4 class="smallHoverText">
-					Improvemnts to Interactive Theorem Proving of Alloy Properties Using SAT-SOLVING -PHD Thesis-2013
-				</h4>
-              </div>
-			 </a>
-             <img src="img/portfolio/Improvemnts to Interactive Theorem Proving of Alloy Properties Using SAT-SOLVING -PHD Thesis-2013.jpg" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-		  
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> 
-			  <a href="img/DynDocuments/dps-ictac2010.pdf">
-              <div class="hover-text">
-                <h4 class="smallHoverText">Dynamite 2.0: New Features Based on UnSAT-Core Extraction to Improve Verification of Software Requirements-ICTAC-2010</h4>
-              </div>
-			  </a>
-              <img src="img/portfolio/Dynamite 2.0- New Features Based on UnSAT-Core Extraction to Improve Verification of Software Requirements-ICTAC-2010.jpeg" class="img-responsive" alt="Project Title"> </div>
-          </div>
-        </div>
-        		  
-         <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> 
-			 <a href="img/DynDocuments/dps-apv2009.pdf">
-              <div class="hover-text">
-                <h4 class="smallHoverText">
-				 Lessons Learned on the Verification of Models  Using Dynamite-APV-2009</h4>
-              </div>
-			 </a>
-              <img src="img/portfolio/Lessons Learned on the Verification of Models  Using Dynamite-APV-2009.jpg" class="img-responsive" alt="Project Title">  </div>
-          </div>
-        </div>
-        
-         <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> 
-			<a href="img/DynDocuments/dps-tacas2007.pdf">
-              <div class="hover-text">
-                <h4 class="smallHoverText">Alloy Analyzer+PVS in the Analysis and Verification of Alloy Specifications-TACAS-2007</h4>
-              </div>
-			</a>
-              <img src="img/portfolio/Alloy Analyzer+PVS in the Analysis and Verification of Alloy Specifications-TACAS-2007.jpeg" class="img-responsive" alt="Project Title"> </div>
-          </div>
-        </div>
-                
-        <!-- ...................................................................................................... -->
+  <section class="section reveal" id="download">
+    <h2>Down&shy;load</h2>
+    <div class="body">
+      <p>Available for <strong>Linux</strong>, once the dependencies are installed.</p>
+      <div class="reqs">
+        <span class="chip">Java 6.0 or later</span>
+        <span class="chip">PVS 6.0 (Emacs 23+)</span>
+        <span class="chip">Alloy Analyzer 4.1.10</span>
       </div>
+      <ol class="steps">
+        <li>Install the required software.</li>
+        <li>Download Dynamite with the button below.</li>
+        <li>Extract the files; this creates the <code>DPSPATH</code> directory.</li>
+        <li>Edit the DPS main script and set the four path variables: <code>JAVAPATH</code>, <code>DPSPATH</code>, <code>PVSPATH</code>, <code>ALLOYPATH</code>.</li>
+      </ol>
+      <a class="btn" href="https://dynamiteprovingsystem.github.io/download/dynamiteprovingsystem.zip">Download Dynamite</a>
     </div>
-  </div>
-</div>
-<!-- requirements-->
+  </section>
 
-<div id="req">
-  <div class="container">
-    <div class="section-title text-center center">
-      <h2>Download and Installation</h2>
-      <hr>
+  <section class="section reveal" id="contact">
+    <div class="contact-head">
+      <h2>Contact</h2>
+      <button type="button" class="mail-copy" id="mailCopy" data-email="mariano.m.moscato@nasa.gov" aria-label="Copy email address mariano.m.moscato@nasa.gov">
+        <span class="mail-addr">mariano.m.moscato@nasa.gov</span>
+        <span class="mail-hint" id="mailHint">Copy</span>
+      </button>
     </div>
-    <div class="row">
-      <div class="col-xs-12 col-md-6"> 
-		  <div class="about-text">
-          <h4 class="nice">Platform Availability</h4>
-          	<p>
-The Dynamite Proving system is available for any Linux platform all its software requirements are available (see System Requirements).</p>
-			<h4 class="nice">System Requirements</h4>
-			  <p>To run the Dynamite Proving System the following software must be installed:</p>
-				<ol class="square">
-					<li>Java 6.0 or above.</li>
-					<li>PVS 6.0 (on Emacs23 or above).</li>
-  					<li>Alloy Analyzer 4.1.10</li>
-			  	</ol>
-			</div>
-		</div>
-      <div class="col-xs-12 col-md-6">
-        <div class="about-text">
-         <h4 class="nice">How to</h4>
-          <ol class="number">
-          <li>Install required software.</li>
-          <li>Download Dynamite using the buton below.</li>
-<!--
-          <li>Download Dynamite from <div class="tooltip">here.<span class="tooltiptext">Please, contact us if you have any problem installing DYNAMITE.</span>
-</div></li>
--->
-          <li>Extract the contents of that file. A new directory will be created, containing the Dynamite Proving System. This will be the Dynamite directory (DPSPATH).</li>
-          <li>Edit the DPS main script (DPSPATH/dps), by modifying the value of the following constants:
-          	<ol class="square">
-				<li>JAVAPATH: full path to the java virtual machine.<br>
-For instance, if your JVM is located inside directory /usr/lib/jvm/default-java/bin, the third line of the script should read JAVAPATH=/usr/lib/jvm/default-java/bin</li>
-         		<li>DPSPATH: full path of the Dynamite directory.<br>
-If you have installed Dynamite in the directory /opt/dps, the corresponding line should read DPSPATH=/opt/dps</li>
-         		<li>PVSPATH: full path of the PVS directory.<br>
-If PVS is installed in your system in directory /opt/pvs, the PVSPATH variable should contain that value, ie, PVSPATH=/opt/pvs</li>
-         		<li>ALLOYPATH: full path of the Alloy directory.<br>
-If the Alloy jar is located in directory /opt/alloy4, the last variable definition of the script should read ALLOYPATH=/opt/alloy4</li>
-          		</ol>
-          </li>
-          </ol>
-          <a href="download/dynamiteprovingsystem.zip" class="btn btn-default btn-lg page-scroll">Download Dynamite</a> </div>
-      </div>
-    </div>
-  </div>
-</div>
-	
-<!-- Contact Section -->
-<!--
-<div id="contact" class="text-center">
-  <div class="container">
-    <div class="section-title center">
-      <h2>Get In Touch</h2>
-      <hr>
-    </div>
-    <div class="col-md-8 col-md-offset-2">
-      <form name="sentMessage" id="contactForm" novalidate>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group">
-              <input type="text" id="name" class="form-control" placeholder="Name" required="required">
-              <p class="help-block text-danger"></p>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <input type="email" id="email" class="form-control" placeholder="Email" required="required">
-              <p class="help-block text-danger"></p>
-            </div>
-          </div>
+    <div class="body">
+      <p>Questions about Dynamite? Copy Mariano Moscato's email address, or send your question with this form.</p>
+      <form id="contactForm" novalidate>
+        <div class="field-row">
+          <div class="field"><label for="cName">Your name</label><input id="cName" name="name" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="cEmail">Your email</label><input id="cEmail" name="email" type="email" autocomplete="email" required></div>
         </div>
-        <div class="form-group">
-          <textarea name="message" id="message" class="form-control" rows="4" placeholder="Message" required></textarea>
-          <p class="help-block text-danger"></p>
+        <div class="field" style="margin-top:18px"><label for="cMsg">Your question</label><textarea id="cMsg" name="message" required></textarea></div>
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div class="form-actions" style="margin-top:18px">
+          <button class="btn" type="submit">Send question</button>
+          <span class="form-note" id="formNote" role="status" aria-live="polite"></span>
         </div>
-        <div id="success"></div>
-        <button type="submit" class="btn btn-default btn-lg">Send Message</button>
       </form>
-      <div class="social">
-        <ul>
-          <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-          <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-          <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
-          <li><a href="#"><i class="fa fa-behance"></i></a></li>
-        </ul>
-      </div>
     </div>
-  </div>
-</div>
--->
-	
-	<!--<div class="banner">
-	<div class="container">
-		<div class="row"></br></div></div></div>-->
-<!--
-	<div class="sos">		
-    	<img class="sos-content" src="img/sos-ciencia.png" width="100" />
-		<span class="cerrar">x</span>
-	</div>
--->
-	
-<div id="footer">
-  <div class="container text-center">
-    <div class="fnav">
-      <p>Copyright &copy; DYNAMITE. Designed by Azul Lopez</a></p>
-<!--	<a href="http://www.templatewire.com" rel="nofollow">-->
-    </div>
-  </div>
-</div>
-<script type="text/javascript" src="js/main.js"></script>
-<script type="text/javascript" src="js/jquery.1.11.1.js"></script> 
-<script type="text/javascript" src="js/bootstrap.js"></script> 
-<script type="text/javascript" src="js/SmoothScroll.js"></script> 
-<script type="text/javascript" src="js/nivo-lightbox.js"></script> 
-<script type="text/javascript" src="js/jquery.isotope.js"></script> 
-<script type="text/javascript" src="js/jqBootstrapValidation.js"></script> 
-<script type="text/javascript" src="js/contact_me.js"></script> 
-<script type="text/javascript" src="js/mine.js"></script>
+  </section>
+
+  <footer>
+    <span>© Dynamite &nbsp;·&nbsp; Designed by Azul Lopez &nbsp;·&nbsp; Powered by Claude<span class="fcur" aria-hidden="true">_</span></span>
+    <a href="#page-top">Back to top ↑</a>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+<script>
+  const root = document.documentElement;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 100vh minus the mobile browser bars */
+  const appHeight = () => root.style.setProperty('--app-height', innerHeight + 'px');
+  addEventListener('resize', appHeight); appHeight();
+
+  /* Lenis smooth scroll (optional: the page still works if the CDN is blocked) */
+  let lenis = null;
+  if (window.Lenis && !reduceMotion) {
+    lenis = new Lenis({ duration: 1.2, easing: t => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)) });
+    const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+  }
+  const goTo = el => lenis ? lenis.scrollTo(el, { offset: -16 }) : el.scrollIntoView({ behavior: 'smooth' });
+  const goTop = () => lenis ? lenis.scrollTo(0) : scrollTo({ top: 0, behavior: 'smooth' });
+
+  /* ---- split text into words > chars ([data-split]) ---- */
+  function splitChars(el){
+    const text = el.textContent;
+    el.textContent = '';
+    text.split(' ').forEach((w, wi, arr) => {
+      const word = document.createElement('span');
+      word.className = 'word';
+      [...w].forEach(c => { const ch = document.createElement('span'); ch.className = 'char'; ch.textContent = c; word.appendChild(ch); });
+      el.appendChild(word);
+      if (wi < arr.length - 1) el.appendChild(document.createTextNode(' '));
+    });
+  }
+  document.querySelectorAll('[data-split]').forEach(splitChars);
+
+  const tiles = [...document.querySelectorAll('.tile')];
+  const headItems = [...document.querySelectorAll('.hover-title')];
+
+  /* in-page cards scroll to their section */
+  tiles.forEach(a => {
+    const h = a.getAttribute('href');
+    if (h && h.startsWith('#')) a.addEventListener('click', e => { e.preventDefault(); goTo(document.querySelector(h)); });
+  });
+
+  /* ---- hover: label rolls up + giant title rises (desktop with a mouse) ---- */
+  let hoverReady = false;
+  function initHover(){
+    if (hoverReady || !matchMedia('(hover:hover) and (min-width:992px)').matches) return;
+    hoverReady = true;
+    const heroWrap = document.querySelector('.hero-wrap');
+    let dimTimer;
+    const dim = on => {
+      clearTimeout(dimTimer);
+      if (on) { heroWrap.classList.add('is-dim'); root.classList.add('is-dim'); }
+      else dimTimer = setTimeout(() => { heroWrap.classList.remove('is-dim'); root.classList.remove('is-dim'); }, 120);
+    };
+    tiles.forEach((card, i) => {
+      const copies = card.querySelectorAll('.label-text');
+      const top = [...copies[0].querySelectorAll('.char')];
+      const btm = [...copies[1].querySelectorAll('.char')];
+      const head = [...headItems[i].querySelectorAll('.char')];
+      const enter = () => {
+        dim(true);
+        gsap.to(head, { yPercent: 0, opacity: 1, duration: .7, ease: 'power3.out', stagger: { amount: .25 }, delay: .05, overwrite: true });
+        gsap.fromTo(top, { yPercent: 0 }, { yPercent: -100, duration: .6, stagger: { amount: .3 }, overwrite: true });
+        gsap.fromTo(btm, { yPercent: 0 }, { yPercent: -100, duration: .6, stagger: { amount: .3 }, delay: .08, overwrite: true });
+      };
+      const leave = () => {
+        dim(false);
+        gsap.to(head, { duration: .25, opacity: 0, stagger: { amount: .04 }, overwrite: true,
+          onComplete: () => gsap.set(head, { yPercent: 110, opacity: 1 }) });
+        gsap.set([...top, ...btm], { yPercent: 0, overwrite: true });
+      };
+      card.addEventListener('mouseenter', enter);
+      card.addEventListener('mouseleave', leave);
+      card.addEventListener('focus', enter);
+      card.addEventListener('blur', leave);
+    });
+  }
+
+  /* ---- intro: name rises, cards grow, labels rise, name leaves ---- */
+  function showNow(){
+    root.classList.add('no-intro', 'grid-in');
+  }
+  let introRunning = false;
+  function runIntro(){
+    introRunning = true;
+    const nameChars = [...document.querySelectorAll('.hero-name .char')];
+    const tileChars = [...document.querySelectorAll('.tile .char')];
+    const headChars = [...document.querySelectorAll('.hover-titles .char')];
+
+    gsap.defaults({ ease: 'power2.inOut', duration: .9 });
+    /* reset everything, so the intro can play again from the Home link */
+    gsap.killTweensOf([...tiles, ...tileChars, ...nameChars, ...headChars, '.hero-logo']);
+    document.querySelector('.hero-wrap').classList.remove('is-dim');
+    root.classList.remove('is-dim');
+    gsap.set(headItems, { display: 'none' });
+    gsap.set('.intro-name', { display: 'flex' });
+    gsap.set(tiles, { pointerEvents: 'none', scaleY: 0, transformOrigin: '50% 100%' });
+    gsap.set(tileChars, { yPercent: 100 });
+    gsap.set(nameChars, { yPercent: 100 });
+    gsap.set(headChars, { yPercent: 110, opacity: 1 });
+    gsap.set('.hero-logo', { opacity: 0, y: 24 });
+    gsap.set('.intro-name', { visibility: 'visible' });
+    gsap.set('.bento', { visibility: 'visible' });
+
+    root.style.overflow = 'hidden';
+    if (lenis) lenis.stop();
+
+    const tl = gsap.timeline({
+      onComplete(){
+        gsap.set('.intro-name', { display: 'none' });
+        gsap.set(headItems, { display: 'block' });
+        gsap.set(tiles, { pointerEvents: 'auto' });
+        root.style.overflow = '';
+        if (lenis) lenis.start();
+        root.classList.add('grid-in');     // dock slides in
+        initHover();
+        introRunning = false;
+      }
+    });
+    tl.to(nameChars, { yPercent: 0, duration: 1.1, ease: 'power3.out', stagger: { amount: .35 } })
+      .to('.hero-logo', { opacity: 1, y: 0, duration: 1 }, 0)
+      .addLabel('cards')
+      .to(tiles, { scaleY: 1, duration: .9, stagger: { amount: .3, from: 'edges' } }, 'cards')
+      .to(tileChars, { yPercent: 0, ease: 'power3.out', stagger: { amount: .35, from: 'start' } }, 'cards+=.55')
+      .to(nameChars, { yPercent: -110, duration: 1, stagger: { amount: .25, from: 'end' } }, 'cards+=.7')
+      .to('.hero-logo', { opacity: 0, y: -24, duration: .7 }, 'cards+=.7');
+  }
+
+  if (window.gsap && !reduceMotion) runIntro(); else showNow();
+
+  /* Home link: go back to the top and play the intro again */
+  function goHome(){
+    if (!window.gsap || reduceMotion) { goTop(); return; }
+    if (introRunning) return;
+    if (scrollY < 4) { runIntro(); return; }
+    if (lenis) {
+      lenis.scrollTo(0, { onComplete: runIntro });
+    } else {
+      scrollTo({ top: 0, behavior: 'smooth' });
+      const t = setInterval(() => { if (scrollY < 4) { clearInterval(t); runIntro(); } }, 50);
+      setTimeout(() => clearInterval(t), 2500);
+    }
+  }
+
+  document.querySelectorAll('footer a[href="#page-top"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); goTop(); }));
+
+  /* ---- Nav bar: split labels, smooth-scroll, mark current section ---- */
+  document.querySelectorAll('[data-chars]').forEach(el => {
+    const txt = el.textContent.trim();
+    el.setAttribute('aria-label', txt);
+    el.innerHTML = '<span class="word" style="display:inline-block" aria-hidden="true">' +
+      [...txt].map((c, i) => `<span class="char" style="--c:${i}">${c}</span>`).join('') + '</span>';
+  });
+
+  const navLinks = [...document.querySelectorAll('.dock .dock-item')];
+  navLinks.filter(a => a.getAttribute('href').startsWith('#')).forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href');
+    id === '#page-top' ? goHome() : goTo(document.querySelector(id));
+  }));
+
+  const spy = navLinks.filter(a => a.getAttribute('href').startsWith('#')).map(a => ({ a, el: a.getAttribute('href') === '#page-top' ? null : document.querySelector(a.getAttribute('href')) }));
+  function updateCurrent(){
+    const line = innerHeight * 0.4;
+    let cur = spy[0];
+    spy.forEach(s => { if (s.el && s.el.getBoundingClientRect().top <= line) cur = s; });
+    spy.forEach(s => {
+      const on = s === cur;
+      s.a.classList.toggle('is-current', on);
+      on ? s.a.setAttribute('aria-current', 'page') : s.a.removeAttribute('aria-current');
+    });
+  }
+  /* nav bar stays hidden on the opening screen; it slides in once the visitor scrolls (or lands lower on the page) */
+  function updateDock(){ root.classList.toggle('dock-on', scrollY > 24); }
+  addEventListener('scroll', updateDock, { passive: true });
+  updateDock();
+  addEventListener('scroll', updateCurrent, { passive: true });
+  addEventListener('resize', updateCurrent);
+  updateCurrent();
+
+  /* ---- Click-to-copy email ---- */
+  const mailBtn = document.getElementById('mailCopy'), mailHint = document.getElementById('mailHint');
+  mailBtn.addEventListener('click', () => {
+    const addr = mailBtn.dataset.email;
+    const done = ok => {
+      mailHint.textContent = ok ? 'Copied!' : 'Press Ctrl/Cmd+C to copy';
+      mailBtn.classList.toggle('copied', ok);
+      setTimeout(() => { mailHint.textContent = 'Copy'; mailBtn.classList.remove('copied'); }, 2200);
+    };
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents(mailBtn.querySelector('.mail-addr'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      done(ok);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(() => done(true), fallback);
+    else fallback();
+  });
+
+  /* ---- Contact form: opens the visitor's email app with the question already written ---- */
+  const FORM_ENDPOINT = 'https://formspree.io/f/mjygvnqo';   // <- paste the Formspree form URL here, e.g. https://formspree.io/f/xxxxxxxx
+  const CONTACT_EMAIL = 'mariano.m.moscato@nasa.gov';   // <- address that receives the questions
+  const form = document.getElementById('contactForm');
+  const note = document.getElementById('formNote');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = form.name.value.trim(), email = form.email.value.trim(), msg = form.message.value.trim();
+    if (!name || !/^\S+@\S+\.\S+$/.test(email) || !msg) { note.textContent = 'Please fill in your name, a valid email and your question.'; return; }
+    if (form._gotcha && form._gotcha.value) return;   // hidden field: bots fill it, people don't
+    if (FORM_ENDPOINT) {
+      const btn = form.querySelector('button[type=submit]');
+      btn.disabled = true; note.textContent = 'Sending…';
+      fetch(FORM_ENDPOINT, {
+        method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message: msg, _subject: 'Dynamite question from ' + name })
+      }).then(r => {
+        if (!r.ok) throw new Error('bad status');
+        form.reset(); note.textContent = 'Thank you! Your question was sent.';
+      }).catch(() => {
+        note.textContent = 'Could not send it. Please copy the email address above and write to us directly.';
+      }).finally(() => { btn.disabled = false; });
+      return;
+    }
+    // no form service set: fall back to the visitor's email app
+    if (!CONTACT_EMAIL) { note.textContent = 'The contact address is not set up yet.'; return; }
+    const body = msg + '\n\n— ' + name + ' (' + email + ')';
+    location.href = 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent('Dynamite question from ' + name) + '&body=' + encodeURIComponent(body);
+    note.textContent = 'Your email app should open with the message ready to send.';
+  });
+
+  const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
 </body>
 </html>
